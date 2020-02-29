@@ -497,35 +497,41 @@ class BroadlinkBG1Switch:
 
     def set_outlet_status(self, slot, status):
         """Get status of outlet from cached status list."""
-        self._states[f"s{slot}"] = status
+        if self._states is not None:
+            self._states[f"s{slot}"] = status
 
     @Throttle(TIME_BETWEEN_UPDATES)
-    def update(self,):
+    def update(self):
         """Fetch new state data for this device."""
         _LOGGER.debug("Polling:")
         self._update(self._retry_times)
 
     def _update(self, retry):
         """Update the state of the device."""
+        states = None
         try:
             # states = self._device.check_power()
             resp = self._device.get_state()
-            states = {
-                "s1": resp["pwr1"],  # Left
-                "s2": resp["pwr2"]   # Right
-            }
-            _LOGGER.debug(states)
+            if resp is not None:
+                states = {
+                    "s1": resp["pwr1"],  # Left
+                    "s2": resp["pwr2"]   # Right
+                }
+                _LOGGER.debug(states)
         except (socket.timeout, ValueError) as error:
+            _LOGGER.debug(f"Polling timeout, trying again: {retry}")
             if retry < 1:
                 _LOGGER.error("Error during updating the state: %s", error)
+                self._states = None
                 return
             if not self._auth(self._retry_times):
+                _LOGGER.error("Auth failed: %s", error)
+                self._states = None
                 return
             return self._update(max(0, retry - 1))
         if states is None and retry > 0:
             return self._update(max(0, retry - 1))
-        if states is not None:
-            self._states = states
+        self._states = states
 
     def _auth(self, retry):
         """Authenticate the device."""
