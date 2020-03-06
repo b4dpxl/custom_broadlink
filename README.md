@@ -4,4 +4,4 @@ Custom extension to the standard Broadlink integration for Home Assistant to sup
 
 The `python-broadlink` library has been extended to support these devices, however the updated version hasn't been released yet, so can't easily be updated in HA. Once a release is done, I'll create a PR for HA. In the meantime, you can run this as a custom component.
 
-Configuration is the same as standard broadlink, just set the "type" to `bg1` and platform as `custom_broadlink` instead of `broadlink`. It will create a "left" and "right" switch for the device.****
+Configuration is the same as standard broadlink, just set the "type" to `bg1` and platform as `custom_broadlink` instead of `broadlink`. It will create a "left" and "right" switch for the device.
